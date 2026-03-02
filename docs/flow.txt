@@ -1,0 +1,58 @@
+# Before starting work - run linting
+make lint
+
+# Develop RTL...
+# Edit rtl/algorithm/polynomial_evaluator.sv
+
+# Lint your changes
+make lint-functional
+
+# Run simulation
+make sim
+
+# View waveforms
+make waves
+
+# Or do it all in one step
+make sim-gui
+
+# Try different parameters
+make sim FP_ENCODING=BFLOAT16 POLY_DEGREE=5
+
+# Or use the helper script
+./scripts/simulate.sh -f BFLOAT16 -d 5 -w
+
+# Before committing
+make lint
+git add .
+git commit -m "Implemented polynomial evaluator"
+
+
+
+# Test all formats
+for fmt in IEEE754_32 BFLOAT16 IEEE754_16; do
+    echo "Testing $fmt..."
+    make sim FP_ENCODING=$fmt
+done
+
+# Or create a batch test script
+cat > scripts/test_all_formats.sh << 'EOF'
+#!/bin/bash
+for fmt in IEEE754_32 BFLOAT16 IEEE754_16 FIXED_POINT; do
+    for deg in 1 2 3; do
+        echo "Testing $fmt degree $deg..."
+        make sim FP_ENCODING=$fmt POLY_DEGREE=$deg
+    done
+done
+EOF
+chmod +x scripts/test_all_formats.sh
+
+
+# When ready for synthesis
+make synth
+
+# Or use FuseSoC (simpler but less control)
+make synth-fusesoc
+
+# Run full implementation
+make impl

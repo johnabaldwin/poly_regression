@@ -1,0 +1,322 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.5.3">
+  <diagram name="Page-1" id="1b5tW5JqjAuQlthV-0qZ">
+    <mxGraphModel dx="1056" dy="553" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" value="Polynomial Regression Hardware Dataflow" vertex="1">
+          <mxGeometry height="40" width="400" x="600" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="mem-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" value="MEMORY SYSTEM" vertex="1">
+          <mxGeometry height="30" width="200" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="data-mem" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" value="Data Memory&#xa;X[M], Y[M]" vertex="1">
+          <mxGeometry height="80" width="120" x="40" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="coeff-mem" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" value="Coefficient Memory&#xa;a₀, a₁, ..., aₙ" vertex="1">
+          <mxGeometry height="80" width="120" x="40" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="grad-mem" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" value="Gradient Memory&#xa;grad[0:n]" vertex="1">
+          <mxGeometry height="80" width="120" x="40" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="iteration-container" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;verticalAlign=top;align=center;" value="TRAINING ITERATION LOOP (iter = 0 to MAX_ITERATIONS)" vertex="1">
+          <mxGeometry height="1040" width="1340" x="220" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="forward-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#007700" value="FORWARD PASS (For each sample i = 0 to M-1)" vertex="1">
+          <mxGeometry height="30" width="400" x="250" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="forward-container" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;verticalAlign=top;" value="" vertex="1">
+          <mxGeometry height="380" width="600" x="250" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="sample-input" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1" value="Read Sample&#xa;x[i], y[i]" vertex="1">
+          <mxGeometry height="60" width="100" x="280" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-1" edge="1" parent="1" source="data-mem" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=11;" target="sample-input">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-1-label" connectable="0" parent="arrow-1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="x[i], y[i]" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="power-comp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;fontFamily=Courier New;" value="Power Computer&#xa;─────────────&#xa;powers[0] = 1&#xa;powers[1] = x&#xa;for k = 2 to n:&#xa;  powers[k] = &#xa;    powers[k-1] × x" vertex="1">
+          <mxGeometry height="120" width="140" x="420" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-2" edge="1" parent="1" source="sample-input" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;" target="power-comp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-2-label" connectable="0" parent="arrow-2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="x" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="poly-eval" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;fontFamily=Courier New;" value="Polynomial Evaluator&#xa;─────────────────&#xa;accum = 0&#xa;for k = 0 to n:&#xa;  product = &#xa;    coeff[k] × powers[k]&#xa;  accum += product&#xa;&#xa;predicted_y = accum" vertex="1">
+          <mxGeometry height="140" width="180" x="600" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-3" edge="1" parent="1" source="power-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;strokeWidth=2;" target="poly-eval">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-3-label" connectable="0" parent="arrow-3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="powers[0:n]" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-4" edge="1" parent="1" source="coeff-mem" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;strokeWidth=2;" target="poly-eval">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="260" />
+              <mxPoint x="200" y="300" />
+              <mxPoint x="580" y="300" />
+              <mxPoint x="580" y="268" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-4-label" connectable="0" parent="arrow-4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="coeff[0:n]" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="error-comp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;fontFamily=Courier New;" value="Error Computer&#xa;─────────────&#xa;error = &#xa;  predicted_y - y[i]&#xa;&#xa;squared_error = &#xa;  error × error&#xa;&#xa;total_loss += &#xa;  squared_error" vertex="1">
+          <mxGeometry height="160" width="160" x="280" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-5" edge="1" parent="1" source="poly-eval" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" target="error-comp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="320" />
+              <mxPoint x="360" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-5-label" connectable="0" parent="arrow-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="predicted_y" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-6" edge="1" parent="1" source="sample-input" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeWidth=2;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="250" />
+              <mxPoint x="260" y="250" />
+              <mxPoint x="260" y="410" />
+            </Array>
+            <mxPoint x="280" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-6-label" connectable="0" parent="arrow-6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="y[i]" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint x="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="error-storage" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1" value="Error Storage&#xa;errors[i] = error" vertex="1">
+          <mxGeometry height="60" width="120" x="480" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="loss-accum" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1" value="Loss Accumulator&#xa;total_loss" vertex="1">
+          <mxGeometry height="60" width="120" x="680" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="backward-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#CC0000" value="BACKWARD PASS (Compute Gradients)" vertex="1">
+          <mxGeometry height="30" width="350" x="900" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="backward-container" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;verticalAlign=top;" value="" vertex="1">
+          <mxGeometry height="380" width="620" x="900" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="grad-comp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;fontFamily=Courier New;" value="Gradient Computer&#xa;─────────────────────────&#xa;For each coefficient k:&#xa;  grad[k] = 0&#xa;  For each sample i:&#xa;    grad[k] += &#xa;      errors[i] × x[i]^k&#xa;  &#xa;  grad[k] *= (2/M)" vertex="1">
+          <mxGeometry height="160" width="200" x="940" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-9" edge="1" parent="1" source="error-storage" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;strokeWidth=2;" target="grad-comp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="410" />
+              <mxPoint x="640" y="480" />
+              <mxPoint x="860" y="480" />
+              <mxPoint x="860" y="228" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-9-label" connectable="0" parent="arrow-9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="errors[i]" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-10" edge="1" parent="1" source="power-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;strokeWidth=2;dashed=1;dashPattern=5 5;" target="grad-comp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="490" y="140" />
+              <mxPoint x="880" y="140" />
+              <mxPoint x="880" y="292" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-10-label" connectable="0" parent="arrow-10" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="powers[k] (reused)" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-11" edge="1" parent="1" source="grad-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;" target="grad-mem">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="260" />
+              <mxPoint x="920" y="510" />
+              <mxPoint x="200" y="510" />
+              <mxPoint x="200" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-11-label" connectable="0" parent="arrow-11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="gradients[0:n]" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="coeff-update" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;fontFamily=Courier New;" value="Coefficient Updater&#xa;───────────────────&#xa;For each k:&#xa;  update = α × grad[k]&#xa;  coeff[k] -= update" vertex="1">
+          <mxGeometry height="100" width="180" x="1180" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-12" edge="1" parent="1" source="grad-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;" target="coeff-update">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-12-label" connectable="0" parent="arrow-12" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="grad[k]" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="learning-rate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1" value="Learning Rate&#xa;α (parameter)" vertex="1">
+          <mxGeometry height="60" width="100" x="1400" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-13" edge="1" parent="1" source="learning-rate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;dashed=1;" target="coeff-update">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-13-label" connectable="0" parent="arrow-13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="α" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-14" edge="1" parent="1" source="coeff-update" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;strokeWidth=2;" target="coeff-mem">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1270" y="300" />
+              <mxPoint x="1480" y="300" />
+              <mxPoint x="1480" y="1090" />
+              <mxPoint x="180" y="1090" />
+              <mxPoint x="180" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="etBtrVt4ltp7ZYyzWr6Z-1" connectable="0" parent="arrow-14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="updated coefficients" vertex="1">
+          <mxGeometry relative="1" x="-0.2665" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fp-unit-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" value="FLOATING POINT ARITHMETIC UNIT" vertex="1">
+          <mxGeometry height="30" width="350" x="480" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="fp-unit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;fontFamily=Courier New;fontStyle=1" value="FP Arithmetic Unit&#xa;(Parameterized by FP_ENCODING)&#xa;────────────────────────&#xa;Operations:&#xa;• ADD&#xa;• SUBTRACT&#xa;• MULTIPLY&#xa;• DIVIDE (optional)&#xa;────────────────────────&#xa;Shared by all computations" vertex="1">
+          <mxGeometry height="180" width="280" x="480" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-fp-1" edge="1" parent="1" source="power-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;dashPattern=2 2;" target="fp-unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-fp-2" edge="1" parent="1" source="poly-eval" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.4;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;dashPattern=2 2;" target="fp-unit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="350" />
+              <mxPoint x="810" y="350" />
+              <mxPoint x="810" y="460" />
+              <mxPoint x="592" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-fp-3" edge="1" parent="1" source="error-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.6;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;dashPattern=2 2;" target="fp-unit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="550" />
+              <mxPoint x="648" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-fp-4" edge="1" parent="1" source="grad-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.8;entryY=0;entryDx=0;entryDy=0;strokeWidth=1;dashed=1;dashPattern=2 2;" target="fp-unit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1040" y="550" />
+              <mxPoint x="704" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fsm-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" value="CONTROL FSM" vertex="1">
+          <mxGeometry height="30" width="200" x="900" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="fsm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;fontFamily=Courier New;fontStyle=1;fontColor=#333333;" value="State Machine&#xa;────────────&#xa;IDLE&#xa;↓&#xa;INIT&#xa;↓&#xa;ITERATION_LOOP&#xa;  ├→ FORWARD_PASS&#xa;  ├→ BACKWARD_PASS&#xa;  └→ UPDATE_PARAMS&#xa;↓&#xa;DONE" vertex="1">
+          <mxGeometry height="180" width="200" x="900" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="metrics-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" value="KEY METRICS" vertex="1">
+          <mxGeometry height="30" width="200" x="1200" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="metrics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;fontFamily=Courier New;fontColor=#333333;" value="Per Iteration:&#xa;• Forward: ~M×(2n+4) cycles&#xa;• Backward: ~M×(n+1) cycles&#xa;• Update: ~n cycles&#xa;────────────────&#xa;Total Training:&#xa;  Iterations × cycles_per_iter&#xa;────────────────&#xa;FP Operations:&#xa;• Multiplications: ~60%&#xa;• Additions: ~35%&#xa;• Other: ~5%" vertex="1">
+          <mxGeometry height="180" width="250" x="1200" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="params-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" value="DESIGN PARAMETERS" vertex="1">
+          <mxGeometry height="30" width="250" x="250" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="params" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;fontFamily=Courier New;" value="Configurable:&#xa;• FP_ENCODING&#xa;  - IEEE754_32&#xa;  - BFLOAT16&#xa;  - IEEE754_16&#xa;  - Custom formats&#xa;• POLY_DEGREE (n)&#xa;• NUM_SAMPLES (M)&#xa;• MAX_ITERATIONS&#xa;• LEARNING_RATE (α)" vertex="1">
+          <mxGeometry height="200" width="250" x="875" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" value="LEGEND" vertex="1">
+          <mxGeometry height="30" width="150" x="580" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-solid" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="580" y="880" as="sourcePoint" />
+            <mxPoint x="650" y="880" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-solid-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" value="Data flow" vertex="1">
+          <mxGeometry height="25" width="80" x="660" y="868" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-dashed" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=2;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="580" y="920" as="sourcePoint" />
+            <mxPoint x="650" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-8" edge="1" parent="1" source="error-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1.007;exitY=0.294;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;exitPerimeter=0;" target="loss-accum">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="460" y="387" />
+              <mxPoint x="460" y="360" />
+              <mxPoint x="650" y="360" />
+              <mxPoint x="650" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-8-label" connectable="0" parent="arrow-8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="squared_error" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-dashed-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" value="Reused data" vertex="1">
+          <mxGeometry height="25" width="80" x="660" y="908" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-dotted" edge="1" parent="1" style="endArrow=classic;html=1;strokeWidth=1;dashed=1;dashPattern=2 2;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="580" y="960" as="sourcePoint" />
+            <mxPoint x="650" y="960" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-dotted-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" value="Uses FP unit" vertex="1">
+          <mxGeometry height="25" width="90" x="660" y="948" as="geometry" />
+        </mxCell>
+        <mxCell id="notes-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" value="IMPLEMENTATION NOTES" vertex="1">
+          <mxGeometry height="30" width="250" x="1185" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="notes" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;fontFamily=Courier New;" value="1. Sequential processing&#xa;   - One FP operation at a time&#xa;   - Reuses FP arithmetic unit&#xa;&#xa;2. Power computation&#xa;   - Sequential multiplication&#xa;   - Stored and reused&#xa;&#xa;3. Gradient accumulation&#xa;   - Loops over all samples&#xa;   - Memory-efficient&#xa;&#xa;4. Fixed iteration count&#xa;   - Predictable timing&#xa;   - No convergence check" vertex="1">
+          <mxGeometry height="200" width="280" x="1185" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-7" edge="1" parent="1" source="error-comp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;" target="error-storage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-7-label" connectable="0" parent="arrow-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="error" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
