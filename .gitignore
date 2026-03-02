@@ -1,0 +1,47 @@
+# Simulation outputs
+sim/*
+!sim/.gitkeep
+*.vcd
+*.fst
+*.ghw
+
+# FuseSoC build directories
+build/
+
+# Vivado
+synth/vivado/vivado_project/
+synth/vivado/.Xil/
+synth/vivado/*.log
+synth/vivado/*.jou
+*.log
+*.jou
+*.str
+
+# Verilator
+obj_dir/
+*.d
+*.o
+
+# Linting outputs
+lint_functional.log
+lint_style.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+data/*/*.hex
+data/*/*.txt
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

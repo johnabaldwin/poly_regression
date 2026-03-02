@@ -1,0 +1,17 @@
+// Verilator Lint Configuration
+// Suppress warnings globally or per-module
+
+// Global waivers
+lint_off -rule DECLFILENAME  // Allow module name != filename
+lint_off -rule UNUSED -file "*/tb/*"  // Unused signals OK in testbenches
+
+// Width warnings can be noisy during development
+// Uncomment to suppress:
+// lint_off -rule WIDTH
+
+// Suppress specific warnings in testbenches
+lint_off -rule STMTDLY -file "*/tb/*"  // Allow delays in testbenches
+
+// Per-module waivers (examples)
+// lint_off -rule UNUSED -module polynomial_evaluator
+// lint_off -rule WIDTH -module gradient_computer
