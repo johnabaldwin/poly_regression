@@ -26,6 +26,12 @@ obj_dir/
 lint_functional.log
 lint_style.log
 
+# Python virtual environment
+.venv/
+
+# Simulation cache
+cache/
+
 # Python
 __pycache__/
 *.pyc

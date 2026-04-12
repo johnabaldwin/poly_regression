@@ -4,79 +4,71 @@ name: john:comp_arch:poly_regression:1.0.0
 description: Polynomial regression using gradient descent with configurable floating point formats
 
 filesets:
-  # RTL source files
+  # FPnew dependencies - common_cells (included in FPnew submodule)
+  common_cells:
+    files:
+      # Only include the specific modules FPnew actually uses
+      - external/fpnew/src/common_cells/src/lzc.sv
+      - external/fpnew/src/common_cells/src/rr_arb_tree.sv
+    file_type: systemVerilogSource
+
+  # FPnew library files
+  fpnew:
+    files:
+      # FPnew package (must come first)
+      - external/fpnew/src/fpnew_pkg.sv
+      # FPnew core modules
+      - external/fpnew/src/fpnew_cast_multi.sv
+      - external/fpnew/src/fpnew_classifier.sv
+      - external/fpnew/src/fpnew_divsqrt_multi.sv
+      - external/fpnew/src/fpnew_fma.sv
+      - external/fpnew/src/fpnew_fma_multi.sv
+      - external/fpnew/src/fpnew_noncomp.sv
+      - external/fpnew/src/fpnew_opgroup_block.sv
+      - external/fpnew/src/fpnew_opgroup_fmt_slice.sv
+      - external/fpnew/src/fpnew_opgroup_multifmt_slice.sv
+      - external/fpnew/src/fpnew_rounding.sv
+      - external/fpnew/src/fpnew_top.sv
+    file_type: systemVerilogSource
+
+
+  # Your RTL source files
   rtl_common:
     files:
-      - rtl/common/parameters.svh: {is_include_file: true}
-      - rtl/common/fp_arithmetic.sv
+      - rtl/common/register.sv
     file_type: systemVerilogSource
-  
+
   rtl_fp_formats:
     files:
-      - rtl/fp_formats/fixed_point/fixed_arithmetic.sv
-      - rtl/fp_formats/ieee754_float32/float32_arithmetic.sv
-      - rtl/fp_formats/bfloat16/bfloat16_arithmetic.sv
-      - rtl/fp_formats/ieee754_float16/float16_arithmetic.sv
+      - rtl/fp_formats/fp_madd.sv
+      - rtl/fp_formats/fp_power.sv
     file_type: systemVerilogSource
-  
+
   rtl_algorithm:
     files:
-      - rtl/algorithm/polynomial_evaluator.sv
-      - rtl/algorithm/gradient_computer.sv
-      - rtl/algorithm/coefficient_updater.sv
-      - rtl/algorithm/gradient_descent_controller.sv
+      - rtl/algorithm/forward_pass.sv
+      - rtl/algorithm/reverse_pass.sv
+      - rtl/algorithm/control.sv
     file_type: systemVerilogSource
-  
+
   rtl_memory:
     files:
-      - rtl/memory/data_memory.sv
-      - rtl/memory/coefficient_memory.sv
-      - rtl/memory/gradient_memory.sv
+      - rtl/memory/ram_sdp.sv
+      - rtl/memory/register_file.sv
     file_type: systemVerilogSource
-  
+
   rtl_top:
     files:
-      - rtl/top/poly_regression_core.sv
+      - rtl/top/poly_regression.sv
     file_type: systemVerilogSource
-  
-  rtl_fpga_top:
-    files:
-      - rtl/top/poly_regression_fpga.sv
-    file_type: systemVerilogSource
-  
-  # Testbench files
-  tb_unit:
-    files:
-      - tb/unit/tb_fp_arithmetic.sv
-      - tb/unit/tb_polynomial_evaluator.sv
-    file_type: systemVerilogSource
-  
-  tb_integration:
-    files:
-      - tb/integration/tb_gradient_descent_core.sv
-    file_type: systemVerilogSource
-  
-  tb_cpp:
-    files:
-      - tb/cpp/tb_main.cpp
-      - tb/cpp/golden_reference.cpp
-      - tb/cpp/golden_reference.h: {is_include_file: true}
-    file_type: cppSource
-  
-  # Constraints for FPGA
-  constraints_nexys_a7:
-    files:
-      - synth/vivado/constraints/nexys_a7.xdc
-      - synth/vivado/constraints/timing.xdc
-    file_type: xdc
 
-# Parameters that can be overridden
+# Parameters
 parameters:
-  FP_ENCODING:
+  FP_FORMAT:
     datatype: str
-    default: "IEEE754_32"
-    description: "Floating point encoding format"
-    paramtype: vlogparam
+    default: "FP32"
+    description: "Floating point format (FP32, FP16, FP16ALT/bfloat16, FP64)"
+    paramtype: vlogdefine
   
   POLY_DEGREE:
     datatype: int
@@ -98,65 +90,48 @@ parameters:
 
 # Build targets
 targets:
-  # Default target (just parse, no build)
   default:
-    filesets: [rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_top]
-  
-  # Verilator simulation target
+    filesets: [common_cells, fpnew, rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_top]
+
   sim:
     default_tool: verilator
     description: "Simulate with Verilator"
-    filesets: [rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_top, tb_integration, tb_cpp]
-    parameters: [FP_ENCODING, POLY_DEGREE, NUM_SAMPLES, MAX_ITERATIONS]
+    filesets: [common_cells, fpnew, rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_top]
+    parameters: [FP_FORMAT, POLY_DEGREE, NUM_SAMPLES, MAX_ITERATIONS]
     tools:
       verilator:
         mode: cc
         verilator_options:
           - '--trace'
           - '--trace-structs'
-          - '--trace-max-array 1024'
           - '-Wall'
           - '-Wno-DECLFILENAME'
           - '-Wno-UNUSED'
+          - '-Wno-UNOPTFLAT'  # FPnew may have optimization warnings
           - '--assert'
-          - '--coverage'
           - '-CFLAGS -std=c++14'
           - '-LDFLAGS -lm'
-    toplevel: poly_regression_core
-  
-  # Unit test target
-  test_unit:
-    default_tool: verilator
-    description: "Run unit tests"
-    filesets: [rtl_common, rtl_fp_formats, tb_unit]
-    tools:
-      verilator:
-        mode: lint-only
-        verilator_options:
-          - '-Wall'
-    toplevel: tb_fp_arithmetic
-  
-  # Lint target (used by Make)
+    toplevel: poly_regression
+
   lint:
     default_tool: verilator
     description: "Lint RTL sources"
-    filesets: [rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_top]
+    filesets: [common_cells, fpnew, rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_top]
     tools:
       verilator:
         mode: lint-only
         verilator_options:
           - '-Wall'
           - '-Wno-DECLFILENAME'
-          - '--lint-only'
-    toplevel: poly_regression_core
-  
-  # Vivado synthesis target
+          - '-Wno-UNOPTFLAT'
+    toplevel: poly_regression
+
   synth:
     default_tool: vivado
     description: "Synthesize for Nexys A7"
-    filesets: [rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_fpga_top, constraints_nexys_a7]
-    parameters: [FP_ENCODING, POLY_DEGREE, NUM_SAMPLES, MAX_ITERATIONS]
+    filesets: [common_cells, fpnew, rtl_common, rtl_fp_formats, rtl_algorithm, rtl_memory, rtl_top]
+    parameters: [FP_FORMAT, POLY_DEGREE, NUM_SAMPLES, MAX_ITERATIONS]
     tools:
       vivado:
         part: xc7a100tcsg324-1
-    toplevel: poly_regression_fpga
+    toplevel: poly_regression

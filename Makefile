@@ -1,6 +1,7 @@
 # =============================================================================
 # Polynomial Regression RTL Project - Hybrid Make + FuseSoC Build System
 # =============================================================================
+SHELL := /bin/bash
 
 # Project configuration
 PROJECT_NAME = poly_regression
@@ -14,8 +15,11 @@ SYNTH_DIR = synth
 DATA_DIR = data
 SCRIPTS_DIR = scripts
 
+# Virtual environment
+VENV = .venv
+
 # Tools
-FUSESOC = fusesoc
+FUSESOC = $(VENV)/bin/fusesoc
 VERILATOR = verilator
 VERIBLE_LINT = verible-verilog-lint
 VERIBLE_FMT = verible-verilog-format
@@ -29,13 +33,13 @@ RTL_INCLUDES = -I$(RTL_DIR)/common
 TB_SOURCES = $(shell find $(TB_DIR) -name "*.sv" -o -name "*.cpp")
 
 # Default parameters (can be overridden)
-FP_ENCODING ?= IEEE754_32
+FP_FORMAT ?= FP32
 POLY_DEGREE ?= 3
 NUM_SAMPLES ?= 100
 MAX_ITERATIONS ?= 1000
 
 # Build flags
-FUSESOC_SIM_FLAGS = --FP_ENCODING=$(FP_ENCODING) --POLY_DEGREE=$(POLY_DEGREE) \
+FUSESOC_SIM_FLAGS = --FP_FORMAT=$(FP_FORMAT) --POLY_DEGREE=$(POLY_DEGREE) \
                     --NUM_SAMPLES=$(NUM_SAMPLES) --MAX_ITERATIONS=$(MAX_ITERATIONS)
 
 # Color output
@@ -71,14 +75,14 @@ help:
 	@echo "  $(COLOR_GREEN)make test-unit$(COLOR_RESET)         - Run unit tests"
 	@echo ""
 	@echo "$(COLOR_BOLD)Simulation Parameters:$(COLOR_RESET)"
-	@echo "  $(COLOR_YELLOW)FP_ENCODING$(COLOR_RESET)=<format>   - Floating point format (default: $(FP_ENCODING))"
+	@echo "  $(COLOR_YELLOW)FP_FORMAT$(COLOR_RESET)=<format>      - Floating point format (default: $(FP_FORMAT))"
 	@echo "  $(COLOR_YELLOW)POLY_DEGREE$(COLOR_RESET)=<n>        - Polynomial degree (default: $(POLY_DEGREE))"
 	@echo "  $(COLOR_YELLOW)NUM_SAMPLES$(COLOR_RESET)=<n>        - Number of samples (default: $(NUM_SAMPLES))"
 	@echo "  $(COLOR_YELLOW)MAX_ITERATIONS$(COLOR_RESET)=<n>     - Max iterations (default: $(MAX_ITERATIONS))"
 	@echo ""
 	@echo "$(COLOR_BOLD)Examples:$(COLOR_RESET)"
-	@echo "  make sim FP_ENCODING=BFLOAT16 POLY_DEGREE=5"
-	@echo "  make sim FP_ENCODING=IEEE754_16 NUM_SAMPLES=200"
+	@echo "  make sim FP_FORMAT=FP16ALT POLY_DEGREE=5"
+	@echo "  make sim FP_FORMAT=FP16 NUM_SAMPLES=200"
 	@echo ""
 	@echo "$(COLOR_BOLD)Synthesis (Vivado):$(COLOR_RESET)"
 	@echo "  $(COLOR_GREEN)make synth$(COLOR_RESET)             - Run Vivado synthesis (via Make)"
@@ -97,6 +101,10 @@ help:
 	@echo "  $(COLOR_GREEN)make clean-synth$(COLOR_RESET)       - Clean synthesis outputs only"
 	@echo "  $(COLOR_GREEN)make info$(COLOR_RESET)              - Show FuseSoC core information"
 	@echo ""
+	@echo "$(COLOR_BOLD)Submodule Management:$(COLOR_RESET)"
+	@echo "  $(COLOR_GREEN)make init-submodules$(COLOR_RESET)    - Initialize git submodules (FPnew)"
+	@echo "  $(COLOR_GREEN)make update-submodules$(COLOR_RESET)  - Update submodules to latest"
+	@echo "  $(COLOR_GREEN)make status-submodules$(COLOR_RESET)  - Show submodule status"
 
 # =============================================================================
 # Linting Targets
@@ -108,9 +116,12 @@ lint: lint-functional lint-style
 
 .PHONY: lint-functional
 lint-functional:
-	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Verilator Functional Lint ===$(COLOR_RESET)"
-	@$(FUSESOC) run --target=lint $(FUSESOC_CORE) 2>&1 | tee lint_functional.log
-	@if [ $$? -eq 0 ]; then \
+	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Functional Lint ===$(COLOR_RESET)"
+	@set -o pipefail; slang --lint-only \
+		-I external/fpnew/src/common_cells/src \
+		external/fpnew/src/fpnew_pkg.sv \
+		$(RTL_SOURCES) 2>&1 | tee lint_functional.log; \
+	if [ $$? -eq 0 ]; then \
 		echo "$(COLOR_GREEN)✓ Functional lint passed$(COLOR_RESET)"; \
 	else \
 		echo "$(COLOR_RED)✗ Functional lint failed$(COLOR_RESET)"; \
@@ -247,6 +258,27 @@ clean: clean-sim clean-synth
 	find . -name "*.log" -delete
 	find . -name "*.jou" -delete
 	@echo "$(COLOR_GREEN)✓ All outputs cleaned$(COLOR_RESET)"
+
+# =============================================================================
+# Submodule Management
+# =============================================================================
+
+.PHONY: init-submodules
+init-submodules:
+	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Initializing Git Submodules ===$(COLOR_RESET)"
+	git submodule update --init --recursive
+	@echo "$(COLOR_GREEN)✓ Submodules initialized$(COLOR_RESET)"
+
+.PHONY: update-submodules
+update-submodules:
+	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Updating Git Submodules ===$(COLOR_RESET)"
+	git submodule update --remote --merge
+	@echo "$(COLOR_GREEN)✓ Submodules updated$(COLOR_RESET)"
+
+.PHONY: status-submodules
+status-submodules:
+	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Submodule Status ===$(COLOR_RESET)"
+	git submodule status
 
 # =============================================================================
 # Phony Targets
