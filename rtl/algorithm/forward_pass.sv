@@ -6,7 +6,7 @@ module forward_pass
     parameter int WIDTH,
     parameter int MAX_DEGREE = 3,
     localparam int DEG_WIDTH = $clog2(MAX_DEGREE) + 1,
-    localparam int FORWARD_LATENCY = FMA_LATENCY*MAX_DEGREE + FMA_LATENCY,
+    localparam int FORWARD_LATENCY = FMA_LATENCY*MAX_DEGREE + FMA_LATENCY + 1,
     parameter int NUM_SAMPLES = 100,
     localparam int ADDR_WIDTH = $clog2(NUM_SAMPLES)
 ) (
@@ -23,12 +23,15 @@ module forward_pass
     output logic [WIDTH-1:0] loss,
     output logic [ADDR_WIDTH-1:0] error_wr_addr,
     output logic fwd_pow_done,
+    output logic coef_rd,
     output logic error_rdy,
     output logic exp_in_rdy
 
 );
 
     logic exp_out_valid;
+    logic exp_valid_r;
+    logic [WIDTH-1:0] x_pow_r;
     logic coef_madd_rdy;
 
     logic [WIDTH-1:0] y_actual;
@@ -38,6 +41,7 @@ module forward_pass
     logic [WIDTH-1:0] accumulate;
 
     logic pow_done;
+    logic pow_done_dlyd;
     logic error_en;
 
     register #(
@@ -79,11 +83,35 @@ module forward_pass
         .done(pow_done)
     );
     assign fwd_pow_done = pow_done;
+    assign coef_rd = exp_out_valid;
 
-    // FMA_LATENCY cycles after last pow calculated the total result is ready
+    // Delay pow_done by FMA_LATENCY for accumulate reset (Bug 1 fix)
     register #(
         .WIDTH(1),
         .N_STAGES(FMA_LATENCY)
+    ) pow_done_delay (
+        .clk,
+        .rst,
+        .en(1'b1),
+        .in(pow_done),
+        .out(pow_done_dlyd)
+    );
+
+    // 1-cycle delay on exp_out_valid and x_pow so coef RAM data is ready (Bug 2 fix)
+    always_ff @(posedge clk or posedge rst) begin
+        if (rst) begin
+            exp_valid_r <= 1'b0;
+            x_pow_r     <= '0;
+        end else begin
+            exp_valid_r <= exp_out_valid;
+            x_pow_r     <= x_pow;
+        end
+    end
+
+    // FMA_LATENCY+1 cycles after last pow: +1 because accumulate FMA now fires 1 cycle later
+    register #(
+        .WIDTH(1),
+        .N_STAGES(FMA_LATENCY + 1)
     ) error_ready (
         .clk,
         .rst,
@@ -92,7 +120,6 @@ module forward_pass
         .out(error_en)
     );
 
-    //TODO: does x_pow need to be stalled for 1 cycle?
     fp_madd #(
         .FP_FORMAT(FP_FORMAT),
         .MODE(fpnew_pkg::FMADD),
@@ -100,9 +127,9 @@ module forward_pass
     ) accumulate_coefficients (
         .clk,
         .rst,
-        .vld(exp_out_valid),
+        .vld(exp_valid_r),
         .sub(1'b0),
-        .a(x_pow),
+        .a(x_pow_r),
         .b(coef_value),
         .c(accumulate),
         .res(coef_madd),
@@ -135,11 +162,12 @@ module forward_pass
         if (rst) begin
             accumulate <= '0;
         end else begin
-
-            if (coef_madd_rdy) begin
-                accumulate <= coef_madd;
-            end else if (pow_done) begin
+            if (pow_done_dlyd) begin
+                // Reset fires at pow_done+FMA_LATENCY, same cycle as the last
+                // coef_madd_rdy — priority here discards the contaminating result
                 accumulate <= '0;
+            end else if (coef_madd_rdy) begin
+                accumulate <= coef_madd;
             end
         end
     end

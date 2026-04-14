@@ -222,9 +222,11 @@ module fp_power
             DONE_STATE: begin
                 done = 1'b1;
                 ready = 1'b1;
-
+                out_result = cur_x_pow;
+                
                 if (in_valid) begin
                     next_x_pow = x_value;
+                    out_result = '0;
                     next_degree = '0;
                     wait_cnt_next = '0;
                 end

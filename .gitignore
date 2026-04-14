@@ -29,6 +29,11 @@ lint_style.log
 # Python virtual environment
 .venv/
 
+# Cocotb simulation build artifacts
+tb/cocotb/sim_build_*/
+tb/cocotb/results_*.json
+tb/cocotb/dump.vcd
+
 # Simulation cache
 cache/
 

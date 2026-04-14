@@ -24,16 +24,16 @@ module control #(
     logic [DEG_WIDTH-1:0] cur_k, next_k;
 
     typedef enum logic[3:0] {
-        INIT,
-        ERR,
+        INIT = '0,
+        ERR = 4'b0001,
         // FORWARD_PASS_READ,
-        FORWARD_PASS_START,
-        FORWARD_PASS_WAIT,
-        REVERSE_PASS_LOOP,
-        REVERSE_PASS_POW,
-        REVERSE_PASS_WAIT,
-        LOOP_BACK,
-        FINISH,
+        FORWARD_PASS_START = 4'b0010,
+        FORWARD_PASS_WAIT = 4'b0011,
+        REVERSE_PASS_LOOP = 4'b0100,
+        REVERSE_PASS_POW = 4'b0101,
+        REVERSE_PASS_WAIT = 4'b0110,
+        LOOP_BACK = 4'b0111,
+        FINISH = 4'b1000,
         XXX = 'X
     } state_t;
 

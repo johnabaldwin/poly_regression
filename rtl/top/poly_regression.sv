@@ -35,6 +35,7 @@ module poly_regression
 );
 
     // Read enables
+    logic fwd_coef_rd;
     logic coef_rd_en;
     logic error_rd_en;
     logic data_rd_en;
@@ -58,7 +59,9 @@ module poly_regression
     assign data_wr_data = '0;
 
     // Addresses
+    logic [1:0] coef_addr_sel;
     logic [CG_ADDR_WIDTH-1:0] coef_wr_addr;
+    logic [CG_ADDR_WIDTH-1:0] coef_rd_addr;
     logic [CG_ADDR_WIDTH-1:0] coef_idx;
     logic [D_ADDR_WIDTH-1:0] error_rd_addr;
     logic [D_ADDR_WIDTH-1:0] error_wr_addr;
@@ -87,7 +90,7 @@ module poly_regression
         .valid     (fwd_data_valid),
         .x_value   (x_rd_data),
         .y_value   (y_rd_data),
-        .coef_value(coef_value),
+        .coef_value(coef_rd_data),
         .data_rd_addr,
         .coef_idx  (coef_idx),
         .x_pow_out (),
@@ -95,6 +98,7 @@ module poly_regression
         .loss      (),
         .error_wr_addr,
         .fwd_pow_done,
+        .coef_rd   (fwd_coef_rd),
         .error_rdy (error_wr_en),
         .exp_in_rdy() //this may need to replace fwd_pow_done?
     );
@@ -116,7 +120,7 @@ module poly_regression
         .alpha       (ALPHA_2M),
         .updated_coef(coef_value),
         .new_coef_rdy(coef_wr_en),
-        .coef_addr   (coef_wr_addr),
+        .coef_wr_addr,
         .rev_pow_done
     );
 
@@ -140,7 +144,10 @@ module poly_regression
     );
 
     //TODO: rather than read at end of exponentiation might need to read with data & delay in module
-    assign coef_rd_en = rev_pow_done; 
+    assign coef_rd_en = rev_pow_done || fwd_coef_rd;
+    assign coef_addr_sel = {rev_pow_done, fwd_coef_rd};
+    assign coef_rd_addr = coef_addr_sel == 2'b01 ? coef_idx :
+                          coef_addr_sel == 2'b10 ? k[1:0] : '0; // k may need to be fixed again :/
     ram_sdp #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(CG_ADDR_WIDTH), // degree n poly has n+1 coefs
@@ -150,7 +157,7 @@ module poly_regression
     ) coef_mem (
         .clk,
         .rd_en(coef_rd_en),
-        .rd_addr(coef_idx),
+        .rd_addr(coef_rd_addr),
         .rd_data(coef_rd_data),
         .wr_en(coef_wr_en),
         .wr_addr(coef_wr_addr),
@@ -161,7 +168,7 @@ module poly_regression
     assign error_rd_en = data_rd_en;
     ram_sdp #(
         .DATA_WIDTH(DATA_WIDTH),
-        .ADDR_WIDTH($clog2(NUM_SAMPLES)), // same num of grads & coefs
+        .ADDR_WIDTH($clog2(NUM_SAMPLES)),
         .WRITE_FIRST(1'b1),
         .STYLE("block")
     ) error_mem (  // no MEM_INIT: errors are computed at runtime
