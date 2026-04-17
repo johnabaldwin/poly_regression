@@ -76,16 +76,18 @@ module control #(
             end
 
             FORWARD_PASS_START: begin
-                next_data_addr = cur_data_addr + 1'b1;
-                fwd_data_valid = 1'b1;
-                next_state = FORWARD_PASS_WAIT;
+                if (cur_data_addr == NUM_SAMPLES + 1) begin
+                    next_data_addr = '0; 
+                    next_state = REVERSE_PASS_LOOP;
+                end else begin 
+                    next_data_addr = cur_data_addr + 1'b1;
+                    fwd_data_valid = 1'b1;
+                    next_state = FORWARD_PASS_WAIT;
+                end
             end
 
             FORWARD_PASS_WAIT: begin
-                if (cur_data_addr == NUM_SAMPLES) begin
-                    next_data_addr = '0;
-                    next_state = REVERSE_PASS_LOOP;
-                end else if (fwd_pow_done) begin
+                if (fwd_pow_done) begin
                     data_rd_en = 1'b1;
                     next_state = FORWARD_PASS_START;
                 end else

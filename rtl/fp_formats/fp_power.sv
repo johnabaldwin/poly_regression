@@ -48,6 +48,7 @@ module fp_power
         WAIT_MULT     = 3'b100,  // Wait for FMA to complete
         OUTPUT_POWER  = 3'b101,  // Output newly computed power
         DONE_STATE    = 3'b110,   // All powers computed
+        RDY_WAIT      = 3'b111,
         XXX = 'x
     } state_t;
 
@@ -144,7 +145,15 @@ module fp_power
                 if (in_valid && ready) begin
                     next_state = OUTPUT_X0;
                 end else begin
-                    next_state = DONE_STATE;
+                    next_state = RDY_WAIT;
+                end
+            end
+
+            RDY_WAIT: begin
+                if (in_valid && ready) begin
+                    next_state = OUTPUT_X0;
+                end else begin
+                    next_state = RDY_WAIT;
                 end
             end
 
@@ -230,6 +239,18 @@ module fp_power
                     next_degree = '0;
                     wait_cnt_next = '0;
                 end
+            end
+
+            RDY_WAIT: begin
+                ready = 1'b1;
+                out_result = cur_x_pow;
+                
+                if (in_valid) begin
+                    next_x_pow = x_value;
+                    out_result = '0;
+                    next_degree = '0;
+                    wait_cnt_next = '0;
+                end 
             end
 
             default: begin
