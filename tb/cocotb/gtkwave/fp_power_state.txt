@@ -1,0 +1,9 @@
+# GTKWave translate filter for fp_power state_t
+# Apply: right-click signal → Data Format → Translate Filter File
+0 IDLE
+1 OUTPUT_X0
+2 OUTPUT_X1
+3 MULTIPLY
+4 WAIT_MULT
+5 OUTPUT_POWER
+6 DONE_STATE

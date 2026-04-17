@@ -62,6 +62,13 @@ async def run_poly_regression(dut):
 
     dut._log.info(f"[{fp_format_name}] done asserted at cycle {cycles_elapsed + 1}")
 
+    # ── Diagnostic: read error_mem contents ───────────────────────────────
+    dut._log.info("=== error_mem (first 10 samples) ===")
+    for i in range(min(10, 50)):
+        raw = int(dut.error_mem.gen_l_ram.ram[i].value)
+        val = fmt.decode(raw)
+        dut._log.info(f"  error[{i:2d}] = {val:.6f}")
+
     # ── Read coef_mem via internal hierarchy ──────────────────────────────
     # Path: dut.coef_mem.gen_l_ram.ram[i]
     # Requires Verilator built with --public-flat-rw.

@@ -79,16 +79,32 @@ def golden_result(dataset: TrainingData) -> dict:
     )
     model = PolynomialRegressionHardware(hp, dataset)
     model.train(verbose=False)
+    fp_stats  = model.fp_unit.get_stats()
+    total_ops = sum(fp_stats.values())
     return {
         "coefficients": model.get_coefficients().tolist(),
         "loss":         float(model.total_loss),
+        "iterations":   model.iteration + 1,
+        "fp_stats":     fp_stats,
+        "total_fp_ops": total_ops,
+        "mem_stats": {
+            "x_reads":     model.data_memory_X.read_count,
+            "y_reads":     model.data_memory_Y.read_count,
+            "coef_reads":  model.coeff_memory.read_count,
+            "coef_writes": model.coeff_memory.write_count,
+            "grad_reads":  model.gradient_memory.read_count,
+            "grad_writes": model.gradient_memory.write_count,
+        },
     }
 
 
 @pytest.fixture(scope="session")
-def hex_data(dataset: TrainingData, initial_coeffs: np.ndarray, tmp_path_factory) -> dict:
+def hex_data(dataset: TrainingData, initial_coeffs: np.ndarray) -> dict:
     """
-    $readmemh hex files for all four FP formats.
+    $readmemh hex files for all four FP formats, written to data/ in the repo.
+
+    Files are deterministic (fixed seeds) so they are regenerated only when
+    missing, keeping the same paths across runs for easy inspection.
 
     Returns:
         {
@@ -97,7 +113,7 @@ def hex_data(dataset: TrainingData, initial_coeffs: np.ndarray, tmp_path_factory
           ...
         }
     """
-    out_dir = tmp_path_factory.mktemp("hex_data")
+    out_dir = REPO_ROOT / "data"
     return generate_all(dataset.X, dataset.Y, initial_coeffs, out_dir)
 
 

@@ -1,0 +1,11 @@
+# GTKWave translate filter for control state_t
+# Apply: right-click signal → Data Format → Translate Filter File
+0 INIT
+1 ERR
+2 FORWARD_PASS_START
+3 FORWARD_PASS_WAIT
+4 REVERSE_PASS_LOOP
+5 REVERSE_PASS_POW
+6 REVERSE_PASS_WAIT
+7 LOOP_BACK
+8 FINISH

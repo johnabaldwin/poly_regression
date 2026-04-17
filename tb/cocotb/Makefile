@@ -55,18 +55,26 @@ test-bfloat16:
 	PYTHONPATH=$(TB_DIR) \
 	$(PYTEST) tests/test_formats.py -k FP16ALT $(PYTEST_OPTS)
 
+# fp_power unit test (FMT defaults to FP64; override with FMT=FP32 etc.)
+FMT ?= FP64
+.PHONY: test-fp-power
+test-fp-power:
+	cd $(TB_DIR) && \
+	PYTHONPATH=$(TB_DIR) \
+	$(PYTEST) tests/test_fp_power.py -k $(FMT) $(PYTEST_OPTS)
+
 # =============================================================================
 # Waveform viewing (opens GTKWave on the most recent VCD)
 # =============================================================================
 
 .PHONY: waves
 waves:
-	@VCD=$$(find $(TB_DIR) -name "*.vcd" | sort -t_ -k1 | tail -1); \
+	@VCD=$$(find $(TB_DIR) -name "dump.vcd" 2>/dev/null | xargs ls -t 2>/dev/null | head -1); \
 	if [ -n "$$VCD" ]; then \
 		echo "Opening $$VCD"; \
 		gtkwave "$$VCD" & \
 	else \
-		echo "No VCD files found. Run a test first."; \
+		echo "No VCD files found. Run: TB_TRACE=1 TB_MAX_CYCLES=500 make test-fp64"; \
 		exit 1; \
 	fi
 

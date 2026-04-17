@@ -56,3 +56,6 @@ data/*/*.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# Temporary debug notes
+debug*.txt
