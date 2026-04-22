@@ -194,9 +194,13 @@ class PolynomialRegressionHardware:
     - Datapath operations
     """
     
-    def __init__(self, hyperparams: HyperParameters, data: TrainingData):
+    def __init__(self, hyperparams: HyperParameters, data: TrainingData,
+                 initial_coeffs=None):
         self.hyperparams = hyperparams
         self.data = data
+        self._initial_coeffs = (
+            np.array(initial_coeffs, dtype=float) if initial_coeffs is not None else None
+        )
 
         # Verbose mode for debugging
         self.verbose = False
@@ -243,11 +247,18 @@ class PolynomialRegressionHardware:
         self.data_memory_X.write_all(self.data.X)
         self.data_memory_Y.write_all(self.data.Y)
         
-        # Initialize coefficients to small random values
-        # In hardware, this could be from external initialization or preset values
-        np.random.seed(42)  # For reproducibility
-        initial_coeffs = np.random.randn(self.n + 1) * 0.01
-        self.coeff_memory.write_all(initial_coeffs)
+        # Initialize coefficients: use externally-supplied values when provided,
+        # otherwise fall back to the default seed-42 random initialization so
+        # that the existing test suite remains deterministic.
+        if self._initial_coeffs is not None:
+            assert len(self._initial_coeffs) == self.n + 1, (
+                f"initial_coeffs length {len(self._initial_coeffs)} != n+1 {self.n+1}"
+            )
+            self.coeff_memory.write_all(self._initial_coeffs)
+        else:
+            np.random.seed(42)  # For reproducibility
+            initial_coeffs = np.random.randn(self.n + 1) * 0.01
+            self.coeff_memory.write_all(initial_coeffs)
         
         # Zero out gradient memory
         self.gradient_memory.write_all(np.zeros(self.n + 1))
@@ -632,10 +643,11 @@ class PolynomialRegressionHardware:
 # Helper Functions for Generating Test Data
 # =============================================================================
 
-def generate_polynomial_data(true_coeffs: List[float], 
+def generate_polynomial_data(true_coeffs: List[float],
                              x_range: Tuple[float, float],
                              num_samples: int,
-                             noise_std: float = 0.0) -> TrainingData:
+                             noise_std: float = 0.0,
+                             quiet: bool = False) -> TrainingData:
     """
     Generate synthetic polynomial data for testing
     
@@ -664,14 +676,15 @@ def generate_polynomial_data(true_coeffs: List[float],
     # Add noise
     if noise_std > 0:
         Y += np.random.normal(0, noise_std, num_samples)
-    
-    print(f"Generated polynomial data:")
-    print(f"  True coefficients: {true_coeffs}")
-    print(f"  Degree: {degree}")
-    print(f"  X range: [{x_range[0]}, {x_range[1]}]")
-    print(f"  Samples: {num_samples}")
-    print(f"  Noise std: {noise_std}")
-    
+
+    if not quiet:
+        print(f"Generated polynomial data:")
+        print(f"  True coefficients: {true_coeffs}")
+        print(f"  Degree: {degree}")
+        print(f"  X range: [{x_range[0]}, {x_range[1]}]")
+        print(f"  Samples: {num_samples}")
+        print(f"  Noise std: {noise_std}")
+
     return TrainingData(X=X, Y=Y, M=num_samples)
 
 

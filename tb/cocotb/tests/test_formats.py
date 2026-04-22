@@ -27,78 +27,8 @@ REPO_ROOT     = TB_COCOTB_DIR.parents[1]
 sys.path.insert(0, str(TB_COCOTB_DIR))
 
 from utils.fp_formats import ALL_FORMATS
-from tb_config import POLY_DEGREE, NUM_SAMPLES, MAX_ITERATIONS, LEARNING_RATE
-
-# ── RTL source list ───────────────────────────────────────────────────────────
-
-def _src(rel: str) -> Path:
-    return REPO_ROOT / rel
-
-VERILOG_SOURCES = [
-    # common_cells (FPnew dependency)
-    _src("external/fpnew/src/common_cells/src/lzc.sv"),
-    _src("external/fpnew/src/common_cells/src/rr_arb_tree.sv"),
-    # FPnew package must be first
-    _src("external/fpnew/src/fpnew_pkg.sv"),
-    # FPnew pipeline helpers
-    _src("external/fpnew/src/fpnew_pipe_in.sv"),
-    _src("external/fpnew/src/fpnew_pipe_inside_fma.sv"),
-    _src("external/fpnew/src/fpnew_pipe_inside_cast.sv"),
-    _src("external/fpnew/src/fpnew_pipe_out.sv"),
-    # FPnew core modules
-    _src("external/fpnew/src/fpnew_classifier.sv"),
-    _src("external/fpnew/src/fpnew_rounding.sv"),
-    _src("external/fpnew/src/fpnew_fma.sv"),
-    _src("external/fpnew/src/fpnew_fma_multi.sv"),
-    _src("external/fpnew/src/fpnew_f2fcast.sv"),
-    _src("external/fpnew/src/fpnew_f2icast.sv"),
-    _src("external/fpnew/src/fpnew_i2fcast.sv"),
-    _src("external/fpnew/src/fpnew_cast_multi.sv"),
-    _src("external/fpnew/src/fpnew_noncomp.sv"),
-    # div/sqrt MVP (instantiated unconditionally by fpnew_opgroup_block)
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/defs_div_sqrt_mvp.sv"),
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/preprocess_mvp.sv"),
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/iteration_div_sqrt_mvp.sv"),
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/nrbd_nrsc_mvp.sv"),
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/norm_div_sqrt_mvp.sv"),
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/control_mvp.sv"),
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/div_sqrt_top_mvp.sv"),
-    _src("external/fpnew/src/fpu_div_sqrt_mvp/hdl/div_sqrt_mvp_wrapper.sv"),
-    _src("external/fpnew/src/fpnew_divsqrt_multi.sv"),
-    _src("external/fpnew/src/fpnew_opgroup_fmt_slice.sv"),
-    _src("external/fpnew/src/fpnew_opgroup_multifmt_slice.sv"),
-    _src("external/fpnew/src/fpnew_opgroup_block.sv"),
-    _src("external/fpnew/src/fpnew_top.sv"),
-    # Project RTL
-    _src("rtl/common/register.sv"),
-    _src("rtl/memory/ram_sdp.sv"),
-    _src("rtl/memory/register_file.sv"),
-    _src("rtl/fp_formats/fp_madd.sv"),
-    _src("rtl/fp_formats/fp_power.sv"),
-    _src("rtl/algorithm/forward_pass.sv"),
-    _src("rtl/algorithm/reverse_pass.sv"),
-    _src("rtl/algorithm/control.sv"),
-    _src("rtl/top/poly_regression.sv"),
-]
-
-# Verilator flags shared across all format builds
-VERILATOR_BUILD_ARGS = [
-    "--public-flat-rw",    # exposes internal signals to cocotb
-    "--trace",
-    "--trace-structs",
-    "-Wno-WIDTHEXPAND",
-    "-Wno-WIDTHTRUNC",
-    "-Wno-UNUSED",
-    "-Wno-UNOPTFLAT",
-    "-Wno-DECLFILENAME",
-    "-Wno-CASEOVERLAP",
-    "-Wno-PINMISSING",
-    "-Wno-ENUMVALUE",
-    "-Wno-ASCRANGE",
-    # FPnew include paths: registers.svh (and common_cells/ variant)
-    f"-I{REPO_ROOT}/external/fpnew/src",
-    f"-I{REPO_ROOT}/external/fpnew/src/common_cells/include",
-]
+from utils.rtl_sources import VERILOG_SOURCES, VERILATOR_BUILD_ARGS
+from tb_config import POLY_DEGREE, NUM_SAMPLES, MAX_ITERATIONS, LEARNING_RATE, sim_cycle_budget
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -218,7 +148,8 @@ def test_format(
         ]),
     }
 
-    max_cycles = os.environ.get("TB_MAX_CYCLES", "2000000")
+    _env_max = os.environ.get("TB_MAX_CYCLES")
+    max_cycles = _env_max if _env_max else str(sim_cycle_budget(POLY_DEGREE, NUM_SAMPLES, MAX_ITERATIONS))
     sim_env["TB_MAX_CYCLES"] = max_cycles
 
     runner.test(
