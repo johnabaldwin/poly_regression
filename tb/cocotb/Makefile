@@ -103,6 +103,55 @@ test-random:
 	}
 
 # =============================================================================
+# Fixed-degree randomised test target
+# =============================================================================
+# Required:
+#   DEGREE - polynomial degree to test
+#   N      - number of random test cases to run
+# Optional:
+#   SEED   - base random seed (default: 0)
+#
+# Runs N tests at the specified degree with random coefficients across all four
+# FP formats.  Adaptive learning rate and iteration scaling are applied
+# automatically (see tb_config.py: degree_lr / degree_max_iter).
+#
+# Example: make test-degree DEGREE=5 N=10 SEED=7
+# =============================================================================
+
+DEGREE ?=
+
+.PHONY: test-degree
+test-degree:
+	@[ -n "$(DEGREE)" ] || { \
+		echo ""; \
+		echo "  Error: DEGREE is required."; \
+		echo "  Usage: make test-degree DEGREE=<deg> N=<count> [SEED=<seed>]"; \
+		echo ""; \
+		exit 1; \
+	}
+	@[ -n "$(N)" ] || { \
+		echo ""; \
+		echo "  Error: N is required."; \
+		echo "  Usage: make test-degree DEGREE=<deg> N=<count> [SEED=<seed>]"; \
+		echo ""; \
+		exit 1; \
+	}
+	@cd $(TB_DIR) && { \
+		PYTHONPATH=$(TB_DIR) \
+		TB_DEGREE=$(DEGREE) \
+		TB_NUM_TESTS=$(N) \
+		TB_RANDOM_SEED=$(SEED) \
+		$(PYTEST) tests/test_degree.py $(PYTEST_OPTS); \
+		rc=$$?; \
+		echo ""; \
+		echo "Generating plots from results..."; \
+		PYTHONPATH=$(TB_DIR) \
+		$(PYTHON) $(TB_DIR)/utils/plot_degree_results.py \
+			$(TB_DIR)/results/degree_$(DEGREE) || true; \
+		exit $$rc; \
+	}
+
+# =============================================================================
 # Waveform viewing (opens GTKWave on the most recent VCD)
 # =============================================================================
 
@@ -131,8 +180,10 @@ clean:
 	rm -f $(TB_DIR)/results/format_comparison.csv
 	rm -f $(TB_DIR)/results/random_summary.csv
 	rm -rf $(TB_DIR)/results/test_*
+	rm -rf $(TB_DIR)/results/degree_*
 	rm -rf $(TB_DIR)/results/plots
 	rm -rf $(REPO_ROOT)/data/random
+	rm -rf $(REPO_ROOT)/data/degree
 
 .PHONY: help
 help:
@@ -153,10 +204,20 @@ help:
 	@echo ""
 	@echo "  Example: make test-random N=20 SEED=42 MAX_DEGREE=6"
 	@echo ""
+	@echo "  make test-degree DEGREE=<d> N=<count>   Fixed-degree sweep across all formats"
+	@echo "    DEGREE     Polynomial degree to test (required)"
+	@echo "    N          Number of random test cases (required)"
+	@echo "    SEED       Base random seed           (default: 0)"
+	@echo ""
+	@echo "  Example: make test-degree DEGREE=5 N=10 SEED=7"
+	@echo ""
 	@echo "  make waves                    Open most recent VCD in GTKWave"
 	@echo "  make clean                    Remove all build and result artifacts"
 	@echo ""
-	@echo "Fixed-test results:  tb/cocotb/results/format_comparison.csv"
-	@echo "Random-test results: tb/cocotb/results/random_summary.csv"
-	@echo "                     tb/cocotb/results/test_<N>/<FMT>/hw_results.json"
-	@echo "Plots:               tb/cocotb/results/plots/"
+	@echo "Fixed-test results:   tb/cocotb/results/format_comparison.csv"
+	@echo "Random-test results:  tb/cocotb/results/random_summary.csv"
+	@echo "                      tb/cocotb/results/test_<N>/<FMT>/hw_results.json"
+	@echo "Degree-test results:  tb/cocotb/results/degree_<D>/summary.csv"
+	@echo "                      tb/cocotb/results/degree_<D>/test_<N>/<FMT>/hw_results.json"
+	@echo "Plots:                tb/cocotb/results/plots/  (random)"
+	@echo "                      tb/cocotb/results/degree_<D>/plots/  (degree)"
