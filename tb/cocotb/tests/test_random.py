@@ -26,6 +26,7 @@ import contextlib
 import csv
 import io
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -106,6 +107,27 @@ def _compute_loss(coeffs: list[float], X: np.ndarray, Y: np.ndarray) -> float:
         return float("inf")
 
 
+def _is_diverged(hw_coeffs: list[float], hw_loss: float,
+                 golden_loss: float, fmt) -> bool:
+    """Return True if gradient descent diverged for any of three reasons:
+      1. A coefficient is inf or NaN (FP64: IEEE overflow/NaN propagation).
+      2. A coefficient is at or above 99 % of the format's max finite value
+         (FP32/FP16/FP16ALT: hardware saturated at the format ceiling).
+      3. hw_loss exceeds golden_loss by more than 1000× (any format: diverged
+         relative to what the same algorithm achieves in FP64).
+    """
+    sat_threshold = 0.99 * fmt.max_value
+    if any(not math.isfinite(c) for c in hw_coeffs):
+        return True
+    if any(abs(c) >= sat_threshold for c in hw_coeffs):
+        return True
+    if not math.isfinite(hw_loss):
+        return True
+    if math.isfinite(golden_loss) and golden_loss > 0 and hw_loss > golden_loss * 1000.0:
+        return True
+    return False
+
+
 def _abs_errors(a: list[float], b: list[float]) -> list[float]:
     return [abs(x - y) for x, y in zip(a, b)]
 
@@ -122,6 +144,7 @@ def _print_report(
     cycles: int,
     golden: dict,
     true_coeffs: list[float],
+    diverged: bool = False,
 ) -> None:
     degree        = tc["degree"]
     golden_coeffs = golden["coefficients"]
@@ -169,6 +192,12 @@ def _print_report(
     print(f"  {'-'*58}")
     for i, (t, h, a, r) in enumerate(zip(true_coeffs, hw_coeffs, ae_vs_true, re_vs_true)):
         print(f"  a[{i}]   {t:>14.6f} {h:>14.6f} {a:>12.2e} {r:>10.2e}")
+
+    if diverged:
+        warn = "  !! DIVERGED: gradient descent did not converge  !!"
+        bar  = "!" * len(warn)
+        print(f"\n{bar}\n{warn}\n{bar}")
+
     print(sep)
 
 
@@ -331,9 +360,11 @@ def test_random_format(tc, fmt, random_results_collector):
     hw_loss       = _compute_loss(hw_coeffs, dataset.X, dataset.Y)
     ae_vs_golden  = _abs_errors(hw_coeffs, golden_coeffs)
     ae_vs_true    = _abs_errors(hw_coeffs, true_coeffs)
+    diverged      = _is_diverged(hw_coeffs, hw_loss, golden["loss"], fmt)
 
     # ── Print report ──────────────────────────────────────────────────────
-    _print_report(tc, fmt.name, hw_coeffs, hw_loss, cycles, golden, true_coeffs)
+    _print_report(tc, fmt.name, hw_coeffs, hw_loss, cycles, golden, true_coeffs,
+                  diverged=diverged)
 
     # ── Accumulate summary row ────────────────────────────────────────────
     # Fixed-width columns up to _MAX_DEGREE so all rows share the same schema.
@@ -344,6 +375,7 @@ def test_random_format(tc, fmt, random_results_collector):
         "learning_rate":         f"{lr:.6e}",
         "max_iter":              max_iter,
         "cycles":                cycles,
+        "diverged":              int(diverged),
         "hw_loss":               f"{hw_loss:.6e}",
         "golden_loss":           f"{golden['loss']:.6e}",
         "max_abs_err_vs_golden": f"{max(ae_vs_golden):.4e}",
