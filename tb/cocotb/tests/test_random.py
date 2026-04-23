@@ -50,7 +50,10 @@ from poly_test import (
     PolynomialRegressionHardware,
     generate_polynomial_data,
 )
-from tb_config import NUM_SAMPLES, MAX_ITERATIONS, LEARNING_RATE, NOISE_STD, X_RANGE, sim_cycle_budget
+from tb_config import (
+    NUM_SAMPLES, MAX_ITERATIONS, LEARNING_RATE, NOISE_STD, X_RANGE,
+    degree_lr, degree_max_iter, sim_cycle_budget,
+)
 
 # ── Test-case generation (evaluated once at collection time) ──────────────────
 
@@ -92,12 +95,15 @@ _IDS    = [
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _compute_loss(coeffs: list[float], X: np.ndarray, Y: np.ndarray) -> float:
-    M = len(X)
-    total = sum(
-        (sum(coeffs[k] * float(X[i]) ** k for k in range(len(coeffs))) - float(Y[i])) ** 2
-        for i in range(M)
-    )
-    return total / M
+    try:
+        M = len(X)
+        total = sum(
+            (sum(coeffs[k] * float(X[i]) ** k for k in range(len(coeffs))) - float(Y[i])) ** 2
+            for i in range(M)
+        )
+        return total / M
+    except OverflowError:
+        return float("inf")
 
 
 def _abs_errors(a: list[float], b: list[float]) -> list[float]:
@@ -206,12 +212,19 @@ def test_random_format(tc, fmt, random_results_collector):
     np.random.seed(tc["coef_seed"])
     initial_coeffs = np.random.randn(degree + 1) * 0.01
 
+    # ── Per-degree hyperparameters ────────────────────────────────────────
+    # lr scales down by 4× per degree above 3 to stay within the gradient
+    # descent stability bound; max_iter scales up proportionally (capped) so
+    # each degree gets an equivalent effective training budget.
+    lr       = degree_lr(degree)
+    max_iter = degree_max_iter(degree)
+
     # ── Golden model (Python FP64 reference) ─────────────────────────────
     # Suppress the verbose training output; results are printed below.
     hp = HyperParameters(
         poly_degree=degree,
-        learning_rate=LEARNING_RATE,
-        max_iterations=MAX_ITERATIONS,
+        learning_rate=lr,
+        max_iterations=max_iter,
     )
     golden_model = PolynomialRegressionHardware(
         hp, dataset, initial_coeffs=initial_coeffs
@@ -257,7 +270,7 @@ def test_random_format(tc, fmt, random_results_collector):
     # Build once per (format, degree) per session; subsequent tests reuse.
     need_build = build_key not in _BUILT
 
-    alpha_2m = fmt.encode(LEARNING_RATE * 2.0 / NUM_SAMPLES)
+    alpha_2m = fmt.encode(lr * 2.0 / NUM_SAMPLES)
 
     runner = get_runner("verilator")
     runner.build(
@@ -267,7 +280,7 @@ def test_random_format(tc, fmt, random_results_collector):
             "FP_FORMAT":      fmt.enum_val,
             "POLY_DEGREE":    degree,
             "NUM_SAMPLES":    NUM_SAMPLES,
-            "MAX_ITERATIONS": MAX_ITERATIONS,
+            "MAX_ITERATIONS": max_iter,
             "ALPHA_2M":       f"{fmt.width}'h{alpha_2m:0{fmt.width // 4}X}",
             "DATA_MEM_INIT":  f'"{data_path}"',
             "COEF_MEM_INIT":  f'"{coef_path}"',
@@ -290,7 +303,7 @@ def test_random_format(tc, fmt, random_results_collector):
         "TB_FP_WIDTH":     str(fmt.width),
         "TB_POLY_DEGREE":  str(degree),
         "TB_RESULTS_FILE": str(results_file),
-        "TB_MAX_CYCLES":   os.environ.get("TB_MAX_CYCLES") or str(sim_cycle_budget(degree, NUM_SAMPLES, MAX_ITERATIONS)),
+        "TB_MAX_CYCLES":   os.environ.get("TB_MAX_CYCLES") or str(sim_cycle_budget(degree, NUM_SAMPLES, max_iter)),
         "PYTHONPATH": os.pathsep.join([
             str(TB_COCOTB_DIR),
             os.environ.get("PYTHONPATH", ""),
@@ -328,6 +341,8 @@ def test_random_format(tc, fmt, random_results_collector):
         "test_idx":              idx,
         "degree":                degree,
         "format":                fmt.name,
+        "learning_rate":         f"{lr:.6e}",
+        "max_iter":              max_iter,
         "cycles":                cycles,
         "hw_loss":               f"{hw_loss:.6e}",
         "golden_loss":           f"{golden['loss']:.6e}",

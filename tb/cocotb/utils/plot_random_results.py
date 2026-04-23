@@ -177,7 +177,7 @@ def plot_overview(rows: list[dict], out_path: Path) -> None:
             loss_by_fmt[row["format"]].append(row["hw_loss"])
     bp_data   = [loss_by_fmt[f] for f in fmts]
     bp_colors = [FORMAT_COLORS[f] for f in fmts]
-    bp = ax.boxplot(bp_data, labels=fmts, patch_artist=True, notch=False)
+    bp = ax.boxplot(bp_data, tick_labels=fmts, patch_artist=True, notch=False)
     for patch, color in zip(bp["boxes"], bp_colors):
         patch.set_facecolor(color)
         patch.set_alpha(0.6)
