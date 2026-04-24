@@ -43,12 +43,13 @@ FUSESOC_SIM_FLAGS = --FP_FORMAT=$(FP_FORMAT) --POLY_DEGREE=$(POLY_DEGREE) \
                     --NUM_SAMPLES=$(NUM_SAMPLES) --MAX_ITERATIONS=$(MAX_ITERATIONS)
 
 # Color output
-COLOR_RESET = \033[0m
-COLOR_BOLD = \033[1m
-COLOR_GREEN = \033[32m
-COLOR_YELLOW = \033[33m
-COLOR_BLUE = \033[34m
-COLOR_RED = \033[31m
+ESC := $(shell printf '\033')
+COLOR_RESET = $(ESC)[0m
+COLOR_BOLD = $(ESC)[1m
+COLOR_GREEN = $(ESC)[32m
+COLOR_YELLOW = $(ESC)[33m
+COLOR_BLUE = $(ESC)[34m
+COLOR_RED = $(ESC)[31m
 
 # =============================================================================
 # Default Target
