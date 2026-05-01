@@ -148,7 +148,7 @@ module poly_regression
     assign coef_addr_sel = {rev_pow_done, fwd_coef_rd};
     assign coef_rd_addr = coef_addr_sel == 2'b01 ? coef_idx :
                           coef_addr_sel == 2'b10 ? k[1:0] : '0; // k may need to be fixed again :/
-    ram_sdp #(
+    (* DONT_TOUCH = "TRUE" *) ram_sdp #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(CG_ADDR_WIDTH), // degree n poly has n+1 coefs
         .WRITE_FIRST(1'b1),
@@ -166,7 +166,7 @@ module poly_regression
 
     assign error_rd_addr = data_rd_addr;
     assign error_rd_en = data_rd_en;
-    ram_sdp #(
+    (* DONT_TOUCH = "TRUE" *) ram_sdp #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH($clog2(NUM_SAMPLES)),
         .WRITE_FIRST(1'b1),
@@ -181,7 +181,7 @@ module poly_regression
         .wr_data(error_wr_data)
     );
 
-    ram_sdp #(
+    (* DONT_TOUCH = "TRUE" *) ram_sdp #(
         .DATA_WIDTH(2 * DATA_WIDTH),
         .ADDR_WIDTH($clog2(NUM_SAMPLES)),
         .WRITE_FIRST(1'b1),

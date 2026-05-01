@@ -20,7 +20,7 @@ module fp_madd
     fpnew_fma #(
         .FpFormat    (FP_FORMAT),
         .NumPipeRegs (FMA_LATENCY),
-        .PipeConfig  (fpnew_pkg::BEFORE),
+        .PipeConfig  (fpnew_pkg::DISTRIBUTED),
         .TagType     (logic),
         .AuxType     (logic)
     ) fma_inst (

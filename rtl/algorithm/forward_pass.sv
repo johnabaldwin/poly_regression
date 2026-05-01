@@ -59,7 +59,7 @@ module forward_pass
         .rst,
         .in_valid(valid),
         .x_value,
-        .degree(MAX_DEGREE),
+        .degree(DEG_WIDTH'(MAX_DEGREE)),
         .in_ready(exp_in_rdy),
         .out_valid(exp_out_valid),
         .out_power_idx(coef_idx),
