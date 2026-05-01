@@ -37,18 +37,21 @@ FP_FORMAT ?= FP32
 POLY_DEGREE ?= 3
 NUM_SAMPLES ?= 100
 MAX_ITERATIONS ?= 1000
+FMA_LATENCY ?= 2
 
 # Build flags
 FUSESOC_SIM_FLAGS = --FP_FORMAT=$(FP_FORMAT) --POLY_DEGREE=$(POLY_DEGREE) \
                     --NUM_SAMPLES=$(NUM_SAMPLES) --MAX_ITERATIONS=$(MAX_ITERATIONS)
 
-# Color output
-COLOR_RESET = \033[0m
-COLOR_BOLD = \033[1m
-COLOR_GREEN = \033[32m
-COLOR_YELLOW = \033[33m
-COLOR_BLUE = \033[34m
-COLOR_RED = \033[31m
+# Color output — ESC must be the actual 0x1b byte, not the \033 literal,
+# because plain 'echo' does not interpret escape sequences.
+ESC          := $(shell printf '\033')
+COLOR_RESET   = $(ESC)[0m
+COLOR_BOLD    = $(ESC)[1m
+COLOR_GREEN   = $(ESC)[32m
+COLOR_YELLOW  = $(ESC)[33m
+COLOR_BLUE    = $(ESC)[34m
+COLOR_RED     = $(ESC)[31m
 
 # =============================================================================
 # Default Target
@@ -85,7 +88,9 @@ help:
 	@echo "  make sim FP_FORMAT=FP16 NUM_SAMPLES=200"
 	@echo ""
 	@echo "$(COLOR_BOLD)Synthesis (Vivado):$(COLOR_RESET)"
-	@echo "  $(COLOR_GREEN)make synth$(COLOR_RESET)             - Run Vivado synthesis (via Make)"
+	@echo "  $(COLOR_GREEN)make create-project$(COLOR_RESET)    - Create Vivado GUI project (.xpr)"
+	@echo "  $(COLOR_GREEN)make synth$(COLOR_RESET)             - Run Vivado synthesis (scripts/synthesize.tcl)"
+	@echo "  $(COLOR_GREEN)make synth-all-formats$(COLOR_RESET) - Synthesize FP32/FP64/FP16/FP16ALT (results per format)"
 	@echo "  $(COLOR_GREEN)make synth-fusesoc$(COLOR_RESET)     - Run Vivado synthesis (via FuseSoC)"
 	@echo "  $(COLOR_GREEN)make impl$(COLOR_RESET)              - Run Vivado implementation"
 	@echo ""
@@ -181,6 +186,30 @@ test-unit:
 # Synthesis Targets
 # =============================================================================
 
+# Create Vivado GUI project
+.PHONY: create-project
+create-project:
+	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Creating Vivado GUI Project ===$(COLOR_RESET)"
+	$(VIVADO) -mode batch -source $(SCRIPTS_DIR)/create_project.tcl \
+	          -tclargs FP_FORMAT=$(FP_FORMAT) POLY_DEGREE=$(POLY_DEGREE) \
+	                   NUM_SAMPLES=$(NUM_SAMPLES) MAX_ITERATIONS=$(MAX_ITERATIONS)
+	@echo "$(COLOR_GREEN)✓ Project created: synth/vivado/vivado_project/poly_regression.xpr$(COLOR_RESET)"
+
+# Synthesize for all four FP formats; results land in synth/vivado/results_<FORMAT>/
+.PHONY: synth-all-formats
+synth-all-formats:
+	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Synthesizing all FP formats ===$(COLOR_RESET)"
+	$(MAKE) synth FP_FORMAT=0
+	$(MAKE) synth FP_FORMAT=1
+	$(MAKE) synth FP_FORMAT=2
+	$(MAKE) synth FP_FORMAT=4
+	@echo ""
+	@echo "$(COLOR_GREEN)✓ All formats synthesized$(COLOR_RESET)"
+	@echo "  synth/vivado/results_FP32/"
+	@echo "  synth/vivado/results_FP64/"
+	@echo "  synth/vivado/results_FP16/"
+	@echo "  synth/vivado/results_FP16ALT/"
+
 # Synthesis via FuseSoC (basic)
 .PHONY: synth-fusesoc
 synth-fusesoc:
@@ -193,7 +222,10 @@ synth-fusesoc:
 synth:
 	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Running Vivado Synthesis (Make) ===$(COLOR_RESET)"
 	@mkdir -p $(SYNTH_DIR)/vivado/reports
-	cd $(SYNTH_DIR)/vivado && $(VIVADO) -mode batch -source scripts/synthesize.tcl
+	$(VIVADO) -mode batch -source $(SCRIPTS_DIR)/synthesize.tcl \
+	          -tclargs FP_FORMAT=$(FP_FORMAT) POLY_DEGREE=$(POLY_DEGREE) \
+	                   NUM_SAMPLES=$(NUM_SAMPLES) MAX_ITERATIONS=$(MAX_ITERATIONS) \
+	                   FMA_LATENCY=$(FMA_LATENCY)
 	@echo "$(COLOR_GREEN)✓ Synthesis complete$(COLOR_RESET)"
 
 .PHONY: impl
@@ -286,6 +318,6 @@ status-submodules:
 
 .PHONY: all help lint lint-functional lint-style format \
         sim sim-gui waves test-unit \
-        synth synth-fusesoc impl \
+        create-project synth synth-all-formats synth-fusesoc impl \
         generate-data compare-formats info \
         clean clean-sim clean-synth

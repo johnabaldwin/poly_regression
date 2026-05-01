@@ -13,6 +13,7 @@ synth/vivado/vivado_project/
 synth/vivado/.Xil/
 synth/vivado/*.log
 synth/vivado/*.jou
+synth/*/*.*/
 *.log
 *.jou
 *.str
@@ -33,6 +34,7 @@ lint_style.log
 tb/cocotb/sim_build_*/
 tb/cocotb/results_*.json
 tb/cocotb/dump.vcd
+tb/cocotb/*/test_*/
 
 # Simulation cache
 cache/

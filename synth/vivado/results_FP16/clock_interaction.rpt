@@ -1,0 +1,25 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (lin64) Build 6299465 Fri Nov 14 12:34:56 MST 2025
+| Date         : Thu Apr 30 18:29:55 2026
+| Host         : desktop running 64-bit Ubuntu 24.04.3 LTS
+| Command      : report_clock_interaction -file /home/john/poly_regression/synth/vivado/results_FP16/clock_interaction.rpt -quiet
+| Design       : mfp_nexys4_ddr
+| Device       : 7a100t-csg324
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
+| Design State : Synthesized
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Clock Interaction Report
+
+Clock Interaction Table
+-----------------------
+
+                            WNS                             TNS Failing  TNS Total    WNS Path         Clock-Pair           Inter-Clock       
+From Clock    To Clock      Clock Edges  WNS(ns)   TNS(ns)    Endpoints    Endpoints  Requirement(ns)  Classification       Constraints       
+------------  ------------  -----------  -------  --------  -----------  -----------  ---------------  -------------------  ----------------  
+CLK100MHZ     CLK100MHZ     rise - rise   -14.44  -5392.96         1050         6529             2.60  Clean                Timed             
+CLK100MHZ     clk_virt                                                0            1                   Ignored              Exclusive Groups  
+clk_virt      CLK100MHZ                                               0         3391                   Ignored              Exclusive Groups  
+
+
