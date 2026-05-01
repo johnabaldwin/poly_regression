@@ -1,0 +1,2 @@
+format,cycles,hw_loss,a0_golden,a0_hw,a0_abs_err,a0_rel_err,a1_golden,a1_hw,a1_abs_err,a1_rel_err,a2_golden,a2_hw,a2_abs_err,a2_rel_err,a3_golden,a3_hw,a3_abs_err,a3_rel_err
+FP32,1974092,9.889800e-02,1.01662421,1.08900011,7.2376e-02,7.1192e-02,1.92664477,1.94221830,1.5574e-02,8.0832e-03,-1.48201610,-1.51190364,2.9888e-02,2.0167e-02,0.48437864,0.48147088,2.9078e-03,6.0031e-03

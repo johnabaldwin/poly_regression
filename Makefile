@@ -124,6 +124,7 @@ lint-functional:
 	@echo "$(COLOR_BOLD)$(COLOR_BLUE)=== Functional Lint ===$(COLOR_RESET)"
 	@set -o pipefail; slang --lint-only \
 		-I external/fpnew/src/common_cells/src \
+		-I $(RTL_DIR)/common \
 		external/fpnew/src/fpnew_pkg.sv \
 		$(RTL_SOURCES) 2>&1 | tee lint_functional.log; \
 	if [ $$? -eq 0 ]; then \
