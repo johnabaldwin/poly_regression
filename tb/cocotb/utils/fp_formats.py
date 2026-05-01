@@ -23,6 +23,7 @@ class FPFormat:
     name:     str
     enum_val: int           # fpnew_pkg::fp_format_e integer value
     width:    int           # bit width of the format
+    exp_bits: int           # IEEE 754 exponent field width
     _encode:  Callable[[float], int]
     _decode:  Callable[[int], float]
 
@@ -42,6 +43,18 @@ class FPFormat:
     def hex_chars(self) -> int:
         """Number of hex characters needed for one value."""
         return self.width // 4
+
+    @property
+    def max_value(self) -> float:
+        """Largest finite positive value representable in this format.
+
+        Computed by decoding the bit pattern one below +inf:
+          inf pattern = (2^exp_bits - 1) << mantissa_bits
+          max finite  = inf pattern - 1
+        """
+        mantissa_bits = self.width - 1 - self.exp_bits
+        inf_bits = ((1 << self.exp_bits) - 1) << mantissa_bits
+        return self.decode(inf_bits - 1)
 
 
 # ── Per-format encode / decode helpers ───────────────────────────────────────
@@ -96,10 +109,10 @@ def _bf16_decode(bits: int) -> float:
 
 # ── Format instances ──────────────────────────────────────────────────────────
 
-FP64    = FPFormat("FP64",    1, 64, _fp64_encode, _fp64_decode)
-FP32    = FPFormat("FP32",    0, 32, _fp32_encode, _fp32_decode)
-FP16    = FPFormat("FP16",    2, 16, _fp16_encode, _fp16_decode)
-FP16ALT = FPFormat("FP16ALT", 4, 16, _bf16_encode, _bf16_decode)
+FP64    = FPFormat("FP64",    1, 64, 11, _fp64_encode, _fp64_decode)
+FP32    = FPFormat("FP32",    0, 32,  8, _fp32_encode, _fp32_decode)
+FP16    = FPFormat("FP16",    2, 16,  5, _fp16_encode, _fp16_decode)
+FP16ALT = FPFormat("FP16ALT", 4, 16,  8, _bf16_encode, _bf16_decode)
 
 # Ordered list for parametrized tests (widest → narrowest)
 ALL_FORMATS = [FP64, FP32, FP16, FP16ALT]
