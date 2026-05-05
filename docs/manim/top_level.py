@@ -17,7 +17,7 @@ DIM   = "#585b70"
 SLOW = 1.0   # global speed multiplier: >1 slows down, <1 speeds up
 
 
-def rbox(label, w=2.2, h=0.85, F=BLK_F, S=BLK_S, fs=18):
+def rbox(label, w=2.2, h=0.85, F=BLK_F, S=BLK_S, fs=28):
     r = RoundedRectangle(corner_radius=0.12, width=w, height=h,
                          fill_color=F, fill_opacity=1,
                          stroke_color=S, stroke_width=2.5)
@@ -50,15 +50,15 @@ class TopLevelFlow(MovingCameraScene):
         R = [2.0, -0.5]
 
         title = Text("Polynomial Regression — System Overview",
-                     font_size=24, color=LAB, weight=BOLD)
+                     font_size=36, color=LAB, weight=BOLD)
         title.to_edge(UP, buff=0.35)
 
-        data_mem   = rbox("Data Memory",   w=2.2, h=0.85, F=MEM_F, S=MEM_S, fs=17)
-        error_mem  = rbox("Error Memory", w=2.2, h=0.85, F=MEM_F, S=ERR_C, fs=17)
-        coef_mem   = rbox("Coef. Memory", w=2.2, h=0.85, F=MEM_F, S=K_C,   fs=17)
-        fwd_pass   = rbox("Forward Pass", w=2.4, h=0.90, F=BLK_F, S=BLK_S, fs=17)
-        controller = rbox("Controller",   w=2.2, h=0.85, F=BLK_F, S=CTL_C, fs=17)
-        rev_pass   = rbox("Reverse Pass", w=2.4, h=0.90, F=BLK_F, S=BLK_S, fs=17)
+        data_mem   = rbox("Data Memory",   w=3.0, h=1.10, F=MEM_F, S=MEM_S, fs=28)
+        error_mem  = rbox("Error Memory", w=3.0, h=1.10, F=MEM_F, S=ERR_C, fs=28)
+        coef_mem   = rbox("Coef. Memory", w=3.0, h=1.10, F=MEM_F, S=K_C,   fs=28)
+        fwd_pass   = rbox("Forward Pass", w=3.2, h=1.10, F=BLK_F, S=BLK_S, fs=28)
+        controller = rbox("Controller",   w=3.0, h=1.10, F=BLK_F, S=CTL_C, fs=28)
+        rev_pass   = rbox("Reverse Pass", w=3.2, h=1.10, F=BLK_F, S=BLK_S, fs=28)
 
         data_mem  .move_to([C[0], R[0], 0])
         error_mem .move_to([C[1], R[0], 0])
@@ -129,7 +129,7 @@ class TopLevelFlow(MovingCameraScene):
         D2.set_opacity(0.55)
 
         # ── Arrow labels ──────────────────────────────────────────────────────
-        def albl(tex, col=DIM, fs=14):
+        def albl(tex, col=DIM, fs=22):
             return MathTex(tex, font_size=fs, color=col)
 
         def mid(a, b):
@@ -139,12 +139,12 @@ class TopLevelFlow(MovingCameraScene):
         L_A2  = albl(r"e_i",  ERR_C).move_to(mid(a2s, a2e) + UP  * 0.28 + LEFT * 0.1)
         L_A3  = albl(r"e_i",  ERR_C).move_to(mid(a3s, a3e) + UP  * 0.28 + RIGHT * 0.1)
         L_A45 = albl(r"c_k",  K_C  ).next_to(VGroup(A4, A5), RIGHT, buff=0.10)
-        L_A6  = albl(r"\mathrm{ctrl}", CTL_C, fs=13).move_to(mid(a6s, a6e) + UP * 0.20)
-        L_A7  = albl(r"\mathrm{status}", CTL_C, fs=13).move_to(mid(a7s, a7e) + DOWN * 0.20)
-        L_A8  = albl(r"\mathrm{ctrl}", CTL_C, fs=13).move_to(mid(a8s, a8e) + UP * 0.20)
-        L_A9  = albl(r"\mathrm{status}", CTL_C, fs=13).move_to(mid(a9s, a9e) + DOWN * 0.20)
-        L_D1  = albl(r"x_i", X_C, fs=13).move_to(mid(d1s, d1e) + UP * 0.22)
-        L_D2  = albl(r"c_k", K_C, fs=13).move_to(mid(d2s, d2e) + DOWN * 0.22)
+        L_A6  = albl(r"\mathrm{ctrl}", CTL_C).move_to(mid(a6s, a6e) + UP * 0.25)
+        L_A7  = albl(r"\mathrm{status}", CTL_C).move_to(mid(a7s, a7e) + DOWN * 0.25)
+        L_A8  = albl(r"\mathrm{ctrl}", CTL_C).move_to(mid(a8s, a8e) + UP * 0.25)
+        L_A9  = albl(r"\mathrm{status}", CTL_C).move_to(mid(a9s, a9e) + DOWN * 0.25)
+        L_D1  = albl(r"x_i", X_C).move_to(mid(d1s, d1e) + UP * 0.28)
+        L_D2  = albl(r"c_k", K_C).move_to(mid(d2s, d2e) + DOWN * 0.28)
         L_D1.set_opacity(0.6); L_D2.set_opacity(0.6)
 
         ov_arrows = VGroup(A1, A2, A3, A4, A5, A6, A7, A8, A9, D1, D2)
@@ -169,7 +169,7 @@ class TopLevelFlow(MovingCameraScene):
         fwd_cap = Tex(
             r"\textbf{Phase 1 — Forward Pass:} "
             r"compute $\hat{y}_i = \sum_k c_k x_i^k$, store $e_i = y_i - \hat{y}_i$",
-            font_size=19, color=BLK_S,
+            font_size=24, color=BLK_S,
         ).to_edge(DOWN, buff=0.38)
         self.play(FadeIn(fwd_cap, shift=UP * 0.1), run_time=0.6 * SLOW)
         self.wait(0.5 * SLOW)
@@ -213,7 +213,7 @@ class TopLevelFlow(MovingCameraScene):
         d, a = move_dot(a7s, a7e, CTL_C, rt=0.75)
         self.play(FadeIn(d), run_time=0.12 * SLOW)
         self.play(a)
-        loss_lbl = MathTex(r"\mathcal{L}", font_size=18, color=CTL_C)
+        loss_lbl = MathTex(r"\mathcal{L}", font_size=26, color=CTL_C)
         loss_lbl.next_to(controller, UP, buff=0.12)
         self.play(FadeOut(d, target_position=controller.get_center()),
                   FadeIn(loss_lbl, scale=0.7), run_time=0.4 * SLOW)
@@ -223,7 +223,7 @@ class TopLevelFlow(MovingCameraScene):
         rev_cap = Tex(
             r"\textbf{Phase 2 — Reverse Pass:} "
             r"$\nabla_k = \sum_i e_i x_i^k$,\quad $c_k \;\leftarrow\; c_k - \alpha\nabla_k$",
-            font_size=19, color=BLK_S,
+            font_size=24, color=BLK_S,
         ).to_edge(DOWN, buff=0.38)
         self.play(FadeOut(fwd_cap), FadeOut(loss_lbl),
                   FadeIn(rev_cap, shift=UP * 0.1), run_time=0.6 * SLOW)
@@ -283,9 +283,113 @@ class TopLevelFlow(MovingCameraScene):
         caption = Tex(
             r"Repeat for $N$ epochs: forward pass fills \texttt{error\_mem}; "
             r"reverse pass updates \texttt{coef\_mem} until convergence.",
-            font_size=19, color=LAB,
+            font_size=24, color=LAB,
         ).to_edge(DOWN, buff=0.35)
         self.play(FadeIn(caption, shift=UP * 0.1), run_time=0.6 * SLOW)
         self.wait(3.5 * SLOW)
         self.play(FadeOut(caption), run_time=0.5 * SLOW)
         self.wait(0.4 * SLOW)
+
+
+class TopLevelStatic(Scene):
+    """Static 1080p overview — all elements placed at once, no animation."""
+
+    def construct(self):
+        self.camera.background_color = BG
+
+        C = [-4.5, 0.0, 4.5]
+        R = [2.0, -0.5]
+
+        title = Text("Polynomial Regression — System Overview",
+                     font_size=36, color=LAB, weight=BOLD)
+        title.to_edge(UP, buff=0.35)
+
+        data_mem   = rbox("Data Memory",   w=3.0, h=1.10, F=MEM_F, S=MEM_S, fs=28)
+        error_mem  = rbox("Error Memory",  w=3.0, h=1.10, F=MEM_F, S=ERR_C, fs=28)
+        coef_mem   = rbox("Coef. Memory",  w=3.0, h=1.10, F=MEM_F, S=K_C,   fs=28)
+        fwd_pass   = rbox("Forward Pass",  w=3.2, h=1.10, F=BLK_F, S=BLK_S, fs=28)
+        controller = rbox("Controller",    w=3.0, h=1.10, F=BLK_F, S=CTL_C, fs=28)
+        rev_pass   = rbox("Reverse Pass",  w=3.2, h=1.10, F=BLK_F, S=BLK_S, fs=28)
+
+        data_mem  .move_to([C[0], R[0], 0])
+        error_mem .move_to([C[1], R[0], 0])
+        coef_mem  .move_to([C[2], R[0], 0])
+        fwd_pass  .move_to([C[0], R[1], 0])
+        controller.move_to([C[1], R[1], 0])
+        rev_pass  .move_to([C[2], R[1], 0])
+
+        a1s = data_mem.get_edge_center(DOWN)
+        a1e = fwd_pass.get_edge_center(UP)
+        A1  = arr(a1s, a1e, X_C)
+
+        a2s = fwd_pass.get_edge_center(RIGHT)
+        a2e = error_mem.get_edge_center(LEFT)
+        A2  = arr(a2s, a2e, ERR_C)
+
+        a3s = error_mem.get_edge_center(RIGHT)
+        a3e = rev_pass.get_edge_center(LEFT)
+        A3  = arr(a3s, a3e, ERR_C)
+
+        a4s = coef_mem.get_edge_center(DOWN) + LEFT  * 0.32
+        a4e = rev_pass.get_edge_center(UP)   + LEFT  * 0.32
+        A4  = arr(a4s, a4e, K_C)
+
+        a5s = rev_pass.get_edge_center(UP)   + RIGHT * 0.32
+        a5e = coef_mem.get_edge_center(DOWN) + RIGHT * 0.32
+        A5  = arr(a5s, a5e, K_C)
+
+        a6s = controller.get_edge_center(LEFT) + UP   * 0.16
+        a6e = fwd_pass.get_edge_center(RIGHT)  + UP   * 0.16
+        A6  = arr(a6s, a6e, CTL_C)
+
+        a7s = fwd_pass.get_edge_center(RIGHT)  + DOWN * 0.16
+        a7e = controller.get_edge_center(LEFT) + DOWN * 0.16
+        A7  = arr(a7s, a7e, CTL_C)
+
+        a8s = controller.get_edge_center(RIGHT) + UP   * 0.16
+        a8e = rev_pass.get_edge_center(LEFT)    + UP   * 0.16
+        A8  = arr(a8s, a8e, CTL_C)
+
+        a9s = rev_pass.get_edge_center(LEFT)    + DOWN * 0.16
+        a9e = controller.get_edge_center(RIGHT) + DOWN * 0.16
+        A9  = arr(a9s, a9e, CTL_C)
+
+        d1s = data_mem.get_edge_center(RIGHT)
+        d1e = rev_pass.get_edge_center(UP) + LEFT * 0.65
+        D1  = Arrow(d1s, d1e, buff=0.0, color=X_C, stroke_width=1.4,
+                    tip_length=0.13, max_tip_length_to_length_ratio=0.45)
+        D1.set_opacity(0.55)
+
+        d2s = coef_mem.get_edge_center(LEFT)
+        d2e = fwd_pass.get_edge_center(UP) + RIGHT * 0.65
+        D2  = Arrow(d2s, d2e, buff=0.0, color=K_C, stroke_width=1.4,
+                    tip_length=0.13, max_tip_length_to_length_ratio=0.45)
+        D2.set_opacity(0.55)
+
+        def albl_s(tex, col=DIM, fs=22):
+            return MathTex(tex, font_size=fs, color=col)
+
+        def mid(a, b):
+            return (np.array(a) + np.array(b)) / 2
+
+        L_A1  = albl_s(r"x_i,\; y_i", X_C).next_to(A1, LEFT, buff=0.10)
+        L_A2  = albl_s(r"e_i",  ERR_C).move_to(mid(a2s, a2e) + UP  * 0.28 + LEFT  * 0.10)
+        L_A3  = albl_s(r"e_i",  ERR_C).move_to(mid(a3s, a3e) + UP  * 0.28 + RIGHT * 0.10)
+        L_A45 = albl_s(r"c_k",  K_C  ).next_to(VGroup(A4, A5), RIGHT, buff=0.10)
+        L_A6  = albl_s(r"\mathrm{ctrl}",   CTL_C).move_to(mid(a6s, a6e) + UP   * 0.25)
+        L_A7  = albl_s(r"\mathrm{status}", CTL_C).move_to(mid(a7s, a7e) + DOWN * 0.25)
+        L_A8  = albl_s(r"\mathrm{ctrl}",   CTL_C).move_to(mid(a8s, a8e) + UP   * 0.25)
+        L_A9  = albl_s(r"\mathrm{status}", CTL_C).move_to(mid(a9s, a9e) + DOWN * 0.25)
+        L_D1  = albl_s(r"x_i", X_C).move_to(mid(d1s, d1e) + UP   * 0.28)
+        L_D2  = albl_s(r"c_k", K_C).move_to(mid(d2s, d2e) + DOWN * 0.28)
+        L_D1.set_opacity(0.6); L_D2.set_opacity(0.6)
+
+        self.add(
+            title,
+            data_mem, error_mem, coef_mem,
+            fwd_pass, controller, rev_pass,
+            A1, A2, A3, A4, A5, A6, A7, A8, A9, D1, D2,
+            L_A1, L_A2, L_A3, L_A45,
+            L_A6, L_A7, L_A8, L_A9,
+            L_D1, L_D2,
+        )
