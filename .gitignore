@@ -13,10 +13,13 @@ synth/vivado/vivado_project/
 synth/vivado/.Xil/
 synth/vivado/*.log
 synth/vivado/*.jou
+synth/vivado/results_*/
+synth/vivado/reports/
 synth/*/*.*/
 *.log
 *.jou
 *.str
+.xil
 
 # Verilator
 obj_dir/
@@ -28,7 +31,9 @@ lint_functional.log
 lint_style.log
 
 # Python virtual environment
-.venv/
+venv
+.venv
+.claude
 
 # Cocotb simulation build artifacts
 tb/cocotb/sim_build_*/
@@ -45,6 +50,7 @@ __pycache__/
 *.pyo
 .pytest_cache/
 *.egg-info/
+scripts/py_results/
 data/*/*.hex
 data/*/*.txt
 
@@ -54,10 +60,18 @@ data/*/*.txt
 *.swp
 *.swo
 *~
+*.dtmp
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Docs
+docs/manim/media/images/
+docs/manim/media/Tex/
+docs/manim/media/texts/
+docs/manim/media/videos/**/480p15/
+
 
 # Temporary debug notes
 debug*.txt
